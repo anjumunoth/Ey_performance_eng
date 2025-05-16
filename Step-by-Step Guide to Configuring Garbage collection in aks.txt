@@ -1,0 +1,243 @@
+Step-by-Step Guide to Configuring Garbage Collection Aspects in AKS:
+
+Prerequisites:
+
+Azure CLI installed and configured.
+
+kubectl installed and configured to connect to your AKS cluster.
+
+An existing AKS cluster.
+
+Step 1: Understanding and Leveraging Kubernetes Object GC (Owner References)
+
+This is mostly about how you design your deployments. It's automatic.
+
+Observation:
+
+Create a Deployment:
+
+# my-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+
+
+kubectl apply -f my-deployment.yaml
+
+Inspect owner references:
+kubectl get rs -l app=nginx -o yaml
+(Look for ownerReferences pointing to nginx-deployment)
+kubectl get po -l app=nginx -o yaml
+(Look for ownerReferences pointing to the ReplicaSet)
+
+Delete the Deployment:
+kubectl delete deployment nginx-deployment
+
+Verify dependent resources are gone:
+kubectl get rs -l app=nginx
+kubectl get po -l app=nginx
+(They should be deleted or terminating).
+
+Action: Always use higher-level controllers like Deployments, StatefulSets, DaemonSets, or Jobs to manage your Pods. Avoid creating standalone Pods unless for specific, short-lived tasks (and even then, consider a Job).
+
+Step 2: Configuring TTL for Finished Jobs
+
+Create a Job with TTL:
+
+# my-job-with-ttl.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pi-with-ttl
+spec:
+  ttlSecondsAfterFinished: 100 # Job will be deleted 100s after completion
+  template:
+    spec:
+      containers:
+      - name: pi
+        image: perl
+        command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"]
+      restartPolicy: Never
+  backoffLimit: 4
+
+Apply and Monitor:
+kubectl apply -f my-job-with-ttl.yaml
+kubectl get jobs -w
+Wait for the job to complete.
+kubectl get jobs pi-with-ttl --watch
+After 100 seconds (plus some processing delay), you should see the Job disappear. The Pods created by this Job will also be deleted.
+
+Action: Use ttlSecondsAfterFinished for Jobs that you don't need to inspect long after they complete to keep your cluster clean.
+
+Step 3: Configuring Kubelet Image Garbage Collection (Node Level)
+
+Kubelet's image GC is configured on each node. In AKS, you do this via a custom Kubelet configuration for a node pool.
+
+Create a Kubelet Configuration File (kubeletconfig.json):
+
+{
+  "imageGCHighThresholdPercent": 80,
+  "imageGCLowThresholdPercent": 70,
+  "imageMinimumGCAge": "1m"
+}
+
+imageGCHighThresholdPercent: Kubelet starts GC when disk usage for images hits this percentage. Default: 85%.
+
+imageGCLowThresholdPercent: Kubelet GCs images until disk usage is below this. Default: 80%.
+
+imageMinimumGCAge: Minimum age for an image to be considered for GC. Default: "2m". (e.g., "1h", "5m").
+
+Apply Kubelet Configuration to a New Node Pool:
+
+RESOURCE_GROUP="yourResourceGroup"
+CLUSTER_NAME="yourAKSCluster"
+NODEPOOL_NAME="customgcpool"
+
+az aks nodepool add \
+    --resource-group $RESOURCE_GROUP \
+    --cluster-name $CLUSTER_NAME \
+    --name $NODEPOOL_NAME \
+    --node-count 1 \
+    --kubelet-config ./kubeletconfig.json
+
+Apply Kubelet Configuration to an Existing Node Pool (causes node re-image):
+
+RESOURCE_GROUP="yourResourceGroup"
+CLUSTER_NAME="yourAKSCluster"
+NODEPOOL_NAME="existingNodepoolToUpdate" # Your existing node pool
+
+az aks nodepool update \
+    --resource-group $RESOURCE_GROUP \
+    --cluster-name $CLUSTER_NAME \
+    --name $NODEPOOL_NAME \
+    --kubelet-config ./kubeletconfig.json
+
+Warning: Updating an existing node pool with Kubelet configuration will re-image the nodes in that pool one by one, which can cause workload disruption if not managed carefully (e.g., with PodDisruptionBudgets).
+
+Verification (Indirect):
+
+You can't directly query Kubelet GC status easily.
+
+SSH into a node in the configured pool (if you have node access setup, or use kubectl debug node/...).
+
+Check Kubelet logs: sudo journalctl -u kubelet -f (look for image GC messages).
+
+Monitor disk space on nodes: df -h /var/lib/docker or /var/lib/containerd (depending on your container runtime). This is easier via Azure Monitor for Containers.
+
+Action: Adjust these thresholds if your nodes frequently run out of disk space due to images, or if you want to be more aggressive/conservative with image cleanup.
+
+Step 4: Configuring Kubelet Eviction Policies (Node Level)
+
+This is also done via KubeletConfiguration, similar to image GC.
+
+Update/Create kubeletconfig.json:
+
+{
+  "imageGCHighThresholdPercent": 80,
+  "imageGCLowThresholdPercent": 70,
+  "imageMinimumGCAge": "1m",
+  "evictionHard": {
+    "memory.available": "100Mi",
+    "nodefs.available": "5%",   // Evict if node root filesystem available < 5%
+    "imagefs.available": "10%"  // Evict if image filesystem available < 10%
+  },
+  "evictionSoft": {
+    "memory.available": "200Mi",
+    "nodefs.available": "10%",
+    "imagefs.available": "15%"
+  },
+  "evictionSoftGracePeriod": {
+    "memory.available": "1m30s",
+    "nodefs.available": "1m30s",
+    "imagefs.available": "1m30s"
+  },
+  "evictionMinimumReclaim": { // How much to reclaim once eviction starts
+      "memory.available": "0Mi",
+      "nodefs.available": "500Mi",
+      "imagefs.available": "2Gi"
+  }
+}
+
+evictionHard: Hard limits. If breached, Kubelet evicts Pods immediately without grace period.
+
+evictionSoft: Soft limits. If breached for evictionSoftGracePeriod, Kubelet evicts Pods.
+
+evictionMinimumReclaim: When Kubelet starts evicting due to disk pressure, it will try to reclaim at least this much.
+
+Apply the Kubelet Configuration:
+Use the same az aks nodepool add/update commands as in Step 3, pointing to your updated kubeletconfig.json. Remember the re-imaging implications for existing node pools.
+
+Monitoring Evictions:
+
+kubectl get events --sort-by='.lastTimestamp' (Look for events with reason: Evicted).
+
+kubectl describe node <node-name> (Check Conditions like DiskPressure, MemoryPressure).
+
+Azure Monitor for Containers will show node disk usage and events.
+
+Action: Configure eviction policies to prevent nodes from becoming completely unresponsive due to resource exhaustion. Test these settings carefully.
+
+Step 5: Cleaning Up Cloud Resources (Storage Reclaim Policy)
+
+This ensures that Azure Disks are deleted when their corresponding PVC/PV is deleted.
+
+Define a StorageClass with reclaimPolicy: Delete:
+
+# sc-azure-disk-delete.yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: azurefile-delete # Or managed-csi-delete for disks
+provisioner: file.csi.azure.com # Or disk.csi.azure.com for Azure Disks
+reclaimPolicy: Delete # Or Retain
+volumeBindingMode: Immediate # Or WaitForFirstConsumer
+allowVolumeExpansion: true
+parameters:
+  skuName: Standard_LRS # For Azure Files, or Standard_LRS/Premium_LRS for disks
+  # For disks, you might have: storageaccounttype, kind etc.
+
+kubectl apply -f sc-azure-disk-delete.yaml
+
+Create a PVC using this StorageClass:
+
+# my-pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-azurefile-pvc # or my-azuredisk-pvc
+spec:
+  accessModes:
+  - ReadWriteMany # Or ReadWriteOnce for disks
+  storageClassName: azurefile-delete # or managed-csi-delete
+  resources:
+    requests:
+      storage: 5Gi
+
+kubectl apply -f my-pvc.yaml
+
+Observe Behavior:
+
+A PV and an Azure File Share (or Azure Disk) will be dynamically provisioned.
+
+kubectl delete pvc my-azurefile-pvc
+
+The PV and the underlying Azure File Share/Disk should be deleted automatically. If reclaimPolicy was Retain, the Azure resource would remain.
+
+Action: Use reclaimPolicy: Delete for dynamically provisioned storage that you don't need to persist after the PVC is gone. Use Retain for critical data you might want to recover or reattach later.
+

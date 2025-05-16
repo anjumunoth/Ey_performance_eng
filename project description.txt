@@ -1,0 +1,81 @@
+
+Service Idea: "Daily Greeting & Fact Service"
+
+This will consist of:
+
+FactApiService: A simple API that, when asked, provides a random "interesting fact."
+
+GreetingComposerService: An API that takes a person's name, calls the FactApiService to get a fact, and then combines the name and the fact into a personalized greeting message.
+
+Service Descriptions:
+
+1. FactApiService (The "Callee" - gets called by the other service)
+
+Purpose: To provide a single, random, interesting (but very simple) fact.
+
+Meaningful Work (Layman): It's like a little trivia machine. You ask for a fact, it gives you one.
+
+Technical Details (Simplified):
+
+It will be an ASP.NET Core Web API.
+
+It will have one main endpoint, for example: GET /api/fact
+
+Internally, it will have a predefined list of simple facts.
+
+When the endpoint is hit, it will randomly select one fact from its list and return it as a JSON response (e.g., {"fact": "The sky is blue on a clear day."}).
+
+It will have a basic health check endpoint (e.g., GET /health).
+
+Why it's good for AKS Demos:
+
+Load Balancing: If many services (or users directly) want facts, AKS can load balance requests to multiple instances of FactApiService.
+
+Auto Scaling (HPA): If getting a fact becomes CPU or memory intensive (we can simulate this by adding a delay or some minor computation), HPA can scale it based on resource usage.
+
+GC/Memory Tuning: We can observe how it handles memory for storing facts (even if small) and for request processing. We could add a feature to "reload facts" to see memory churn.
+
+2. GreetingComposerService (The "Caller" - calls FactApiService)
+
+Purpose: To create a personalized greeting that includes a name and a random fact.
+
+Meaningful Work (Layman): It's like a friendly robot that says hello to you by name and tells you something new.
+
+Technical Details (Simplified):
+
+It will be an ASP.NET Core Web API.
+
+It will have one main endpoint, for example: GET /api/greeting/{name}
+
+When this endpoint is hit:
+
+It will make an HTTP GET request to the FactApiService (e.g., to http://factapiservice.aks-demo.svc.cluster.local/api/fact if running in the same Kubernetes namespace, or an external URL if FactApiService is exposed differently).
+
+It will receive the fact from FactApiService.
+
+It will then construct a greeting string, like: "Hello, {name}! Here's a fun fact for you: {fact_from_service}".
+
+It will return this greeting as a JSON response (e.g., {"greeting": "Hello, Alice! Here's a fun fact for you: The sky is blue on a clear day."}).
+
+It will have a basic health check endpoint (e.g., GET /health).
+
+Why it's good for AKS Demos:
+
+Inter-Service Communication: Clearly demonstrates one service calling another within AKS.
+
+Load Balancing: If many users want greetings, AKS can load balance requests to multiple instances of GreetingComposerService.
+
+Auto Scaling (HPA): If composing the greeting (including the call to the other service and string manipulation) becomes resource-intensive, HPA can scale it.
+
+GC/Memory Tuning: We can observe memory usage related to HttpClient instances (and the importance of HttpClientFactory), string building, and request/response handling.
+
+Resilience (Advanced Demo): Could later be extended to show patterns like retries or circuit breakers if FactApiService is unavailable.
+
+How they interact:
+
+User/Client -> GreetingComposerService (GET /api/greeting/Bob)
+GreetingComposerService -> (makes HTTP GET to) FactApiService (GET /api/fact)
+FactApiService -> (returns {"fact": "Cats can sleep up to 16 hours a day."})
+GreetingComposerService -> (constructs greeting and returns {"greeting": "Hello, Bob! Here's a fun fact for you: Cats can sleep up to 16 hours a day."})
+User/Client <- (receives the greeting)
+

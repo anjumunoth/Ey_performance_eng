@@ -1,0 +1,505 @@
+Okay, assuming you've got both FactApiService and GreetingComposerService running locally and GreetingComposerService can successfully call FactApiService (meaning you get a proper greeting with a fact in your browser when you hit the /api/greeting/{name} endpoint), here are the next steps to get this deployed to Azure Kubernetes Service (AKS) and test the features you originally requested:
+
+Phase 1: Containerization and Azure Setup
+
+Ensure Docker is Installed and Running: You'll need Docker to build images.
+
+Azure Account and CLI:
+
+Ensure you have an Azure account (Pay-as-you-go or Free account with credits).
+
+Install and log in to the Azure CLI (az login).
+
+Create Azure Resources (if not already done from previous examples):
+
+Resource Group:
+# Or your preferred region
+az group create --name GreetingAppRG --location eastus 
+
+
+Azure Container Registry (ACR): To store your Docker images.
+Use Azure Cloud Shell (Bash environment) in your browser or  Install Git Bash (comes with Git for Windows). This gives you a Bash-like environment.
+
+Open Git Bash from the project folder:
+Search for "Git Bash" in your Windows Start Menu and open it. You'll get a terminal window that looks similar to a Linux terminal.
+Ensure Azure CLI is Accessible:
+If you installed Azure CLI using the Windows MSI installer, Git Bash should typically be able to find it in your system's PATH.
+Type az --version and press Enter. If you see the Azure CLI version information, you're good to go.
+If not, you might need to ensure the Azure CLI installation directory (usually something like C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\wbin or C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin) is added to your Windows System PATH environment variable, and then restart Git Bash.
+Log in to Azure (if you haven't already in this session):
+az login
+
+This will open a browser window for you to authenticate.
+Run the Commands:
+You can now run the original commands directly as they were intended for a Bash environment.
+# 0. First, ensure the Resource Group exists (run this once if it's not already created)
+az group create --name GreetingAppRG --location eastus # Or your preferred region
+
+# 1. Set the ACR_NAME variable with a random suffix
+#    (openssl should be available within Git Bash's minimal Unix-like environment)
+ACR_NAME="greetingappregistry$(openssl rand -hex 3)"
+echo "Generated ACR Name: $ACR_NAME"
+
+# 2. Create the Azure Container Registry
+az acr create --resource-group GreetingAppRG --name $ACR_NAME --sku Basic --admin-enabled true
+
+If u get an error ,This error occurs because your Azure subscription is not registered to use the Microsoft.ContainerService resource provider, which is required for creating an Azure Kubernetes Service (AKS) cluster.
+Register via Azure Portal
+- Go to the Azure Portal.
+- Navigate to Subscriptions.
+- Select your subscription.
+- Click on Resource Providers in settings.
+- Search for Microsoft.ContainerService and click Register.
+Once the provider is registered, retry your command:
+
+
+# 3. Get the ACR login server name and store it in a variable
+ACR_LOGIN_SERVER=$(az acr show --name $ACR_NAME --query loginServer --output tsv)
+
+# 4. Display the ACR login server
+echo "ACR Login Server: $ACR_LOGIN_SERVER"
+
+# Reminder: For production, use service principals instead of --admin-enabled
+
+
+
+
+
+Azure Kubernetes Service (AKS):
+
+AKS_CLUSTER_NAME="greetingappaks"
+az aks create \
+    --resource-group GreetingAppRG \
+    --name $AKS_CLUSTER_NAME \
+    --node-count 1 \
+    --node-vm-size Standard_B2s \
+    --enable-managed-identity \
+    --generate-ssh-keys
+# Get credentials for kubectl
+az aks get-credentials --resource-group GreetingAppRG --name $AKS_CLUSTER_NAME --overwrite-existing
+kubectl get nodes # Verify connection
+
+
+
+
+Build Docker Images:
+In git bash, navigate to the project folder 
+
+For FactApiService:
+
+cd FactApiService
+docker build -t $ACR_LOGIN_SERVER/factapiservice:v1 .
+cd ..
+
+For GreetingComposerService:
+
+cd GreetingComposerService
+docker build -t $ACR_LOGIN_SERVER/greetingcomposerservice:v1 .
+cd ..
+
+Push Docker Images to ACR:
+
+Login to ACR (if using admin user, password can be retrieved; for service principal, docker login with SP credentials). The az acr login command simplifies this for your current Azure CLI user if they have permissions.
+
+az acr login --name $ACR_NAME
+
+
+Push the images:
+
+docker push $ACR_LOGIN_SERVER/factapiservice:v1
+docker push $ACR_LOGIN_SERVER/greetingcomposerservice:v1
+
+
+Phase 2: Kubernetes Manifests and Deployment
+
+Create a k8s Directory: In your project root directory.
+
+mkdir k8s
+cd k8s
+
+Create Kubernetes Manifest YAML Files:
+
+00-namespace.yaml:
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: greeting-app
+
+01-factapi-deployment.yaml:
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: factapi-deployment
+  namespace: greeting-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: factapi
+  template:
+    metadata:
+      labels:
+        app: factapi
+    spec:
+      containers:
+      - name: factapi
+        image: YOUR_ACR_LOGIN_SERVER/factapiservice:v1 # <-- REPLACE THIS
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 20
+          periodSeconds: 15
+        # Example GC env vars (optional, for testing)
+        # env:
+        # - name: DOTNET_gcServer
+        #   value: "1"
+        # - name: DOTNET_GCHeapHardLimitPercent
+        #   value: "70"
+
+ACTION: Replace YOUR_ACR_LOGIN_SERVER with your actual ACR login server name.
+
+02-factapi-service.yaml: (Internal service for GreetingComposerService to call)
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: factapiservice # This becomes the DNS name inside the cluster
+  namespace: greeting-app
+spec:
+  selector:
+    app: factapi
+  ports:
+  - protocol: TCP
+    port: 80 # Service port
+    targetPort: 8080 # Container port
+  type: ClusterIP # Only reachable within the cluster
+
+03-greetingcomposer-deployment.yaml:
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: greetingcomposer-deployment
+  namespace: greeting-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: greetingcomposer
+  template:
+    metadata:
+      labels:
+        app: greetingcomposer
+    spec:
+      containers:
+      - name: greetingcomposer
+        image: YOUR_ACR_LOGIN_SERVER/greetingcomposerservice:v1 # <-- REPLACE THIS
+        ports:
+        - containerPort: 8080
+        env:
+        - name: FactService__BaseUrl # Overrides appsettings.json
+          value: "http://factapiservice.greeting-app.svc.cluster.local:80" # K8s internal DNS
+          # Or simply "http://factapiservice:80" if port 80 is the service port
+        # - name: ASPNETCORE_ENVIRONMENT # For enabling Swagger in K8s for testing
+        #   value: "Development_Swagger"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "384Mi" # Slightly more for HttpClient and string ops
+            cpu: "700m"
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 15
+
+ACTION: Replace YOUR_ACR_LOGIN_SERVER.
+
+Note the FactService__BaseUrl environment variable. This uses Kubernetes DNS to resolve the factapiservice Service we defined in 02-factapi-service.yaml. The format is http://<service-name>.<namespace>.svc.cluster.local:<service-port>. If the service port is 80, you can sometimes omit it and the namespace if calling from within the same namespace, simplifying to http://factapiservice. Using the FQDN is more robust.
+
+04-greetingcomposer-service.yaml: (External service to access GreetingComposerService)
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: greetingcomposer-service
+  namespace: greeting-app
+spec:
+  selector:
+    app: greetingcomposer
+  ports:
+  - protocol: TCP
+    port: 80 # External port
+    targetPort: 8080 # Container port
+  type: LoadBalancer # Exposes externally via Azure Load Balancer
+
+05-factapi-hpa.yaml:
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: factapi-hpa
+  namespace: greeting-app
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: factapi-deployment
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50
+  # - type: Resource # Optional: memory based scaling
+  #   resource:
+  #     name: memory
+  #     target:
+  #       type: Utilization
+  #       averageUtilization: 70
+
+06-greetingcomposer-hpa.yaml:
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: greetingcomposer-hpa
+  namespace: greeting-app
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: greetingcomposer-deployment
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 60 # Maybe a bit higher tolerance
+
+(No KEDA for these services): KEDA is for event-driven scaling (like queue length). These services are HTTP-driven, so standard HPA based on CPU/memory is appropriate. If FactApiService was, for example, processing items from a queue pushed by GreetingComposerService, then KEDA would be relevant for FactApiService.
+
+Deploy to AKS:
+Navigate to your k8s directory in git bash:
+
+Apply the namespace:
+
+kubectl apply -f namespace.yaml
+Apply the deployments and services:
+
+kubectl apply -f factapi-deployment.yaml
+kubectl apply -f factapi-service.yaml # The order between these two usually doesn't matter critically
+
+kubectl apply -f greetingcomposer-deployment.yaml
+kubectl apply -f greetingcomposer-service.yaml
+
+kubectl apply -f factapi-hpa.yaml
+kubectl apply -f greetingcomposer-hpa.yaml
+
+Verify Deployments:
+
+kubectl get all -n greeting-app
+kubectl get hpa -n greeting-app
+# Wait for greetingcomposer-service EXTERNAL-IP
+kubectl get svc greetingcomposer-service -n greeting-app --watch
+
+
+# Set your variables
+RG_NAME="GreetingAppRG"
+AKS_CLUSTER_NAME="greetingappaks"
+
+
+az aks update -n $AKS_CLUSTER_NAME -g $RG_NAME --attach-acr $ACR_NAME
+
+Monitor the new pods:
+kubectl get pods -n greeting-app -l app=greetingcomposer -w
+
+
+Phase 3: Testing AKS Features
+
+Test Basic Functionality:
+
+Once greetingcomposer-service has an EXTERNAL-IP, test it in your browser:
+http://<EXTERNAL-IP>/api/greeting/AKSUser
+http://4.255.32.28/api/greeting/AKSUser 
+
+Check logs of both services to see the call flow:
+
+kubectl logs -n greeting-app -l app=factapi -f
+kubectl logs -n greeting-app -l app=greetingcomposer -f
+
+Test Load Balancing (for GreetingComposerService):
+Load balancing for your GreetingComposerService is handled by the Azure Load Balancer that was provisioned when you created the Kubernetes Service of type: LoadBalancer. This Load Balancer distributes incoming requests across all the healthy and ready pods backing that service.
+To effectively test and observe load balancing, you ideally need:
+Multiple healthy and ready replicas (pods) of GreetingComposerService.
+A way to distinguish which pod is serving a request (usually through logs).
+A way to send multiple requests.
+
+If you manually scale greetingcomposer-deployment to more than 1 replica (kubectl scale deployment greetingcomposer-deployment --replicas=3 -n greeting-app), requests to the EXTERNAL-IP should be distributed. HPA will do this automatically under load.
+
+
+If you want to quickly see load balancing without waiting for HPA to react to significant load, you can manually scale the deployment:
+kubectl scale deployment greetingcomposer-deployment --replicas=3 -n greeting-app
+Wait for the new pods to become Running and READY 1/1:
+kubectl get pods -n greeting-app -l app=greetingcomposer -w
+
+Step 2: Prepare to Observe Logs
+Your GreetingComposerService logs messages like "Greeting requested for name: {Name}". When multiple pods are running, each request will hit one of them.
+Stream logs from all greetingcomposer pods:
+Open a new terminal window and run:
+kubectl logs -n greeting-app -l app=greetingcomposer -f --tail=10
+This command will follow (-f) the logs from all pods matching the label app=greetingcomposer. Each log line is usually prefixed with the pod's name, so you can see which pod handled which request.
+
+Step 3: Send Multiple Requests
+You can do this in a few ways:
+Manually from your browser:
+Get the EXTERNAL-IP of your greetingcomposer-service:
+EXTERNAL_IP=$(kubectl get svc greetingcomposer-service -n greeting-app -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+echo $EXTERNAL_IP
+Open http://$EXTERNAL_IP/api/greeting/TestUser1 in your browser.
+Observe the kubectl logs ... terminal. Note which pod served the request.
+Refresh the browser or open http://$EXTERNAL_IP/api/greeting/TestUser2.
+Observe the logs again. Ideally, if you have multiple replicas, the request might go to a different pod. The default load balancing algorithm is typically round-robin, but with just a few manual requests, you might hit the same pod a couple of times due to session affinity settings in the load balancer (if any, though default is usually none or source IP based) or just the nature of small numbers.
+
+Step 4: Scale Back Down (if manually scaled)
+If you manually scaled up with kubectl scale, remember to scale back down if you want HPA to manage it from its minReplicas:
+# kubectl scale deployment greetingcomposer-deployment --replicas=1 -n greeting-app
+# Or let HPA take over by just removing the manual replica count override (though HPA will eventually bring it down if load is low)
+
+Test Auto Scaling (HPA):
+
+FactApiService:
+
+Generate load on its /api/fact/complex?complexity=X endpoint. You can do this from within a pod in the cluster or expose factapiservice with a temporary LoadBalancer service for external testing.
+
+Example using a temporary port-forward (less ideal for sustained load but good for a quick check):
+
+# In one terminal:
+kubectl port-forward svc/factapiservice 8888:80 -n greeting-app
+# In another terminal (requires a load testing tool like 'hey'):
+# go install github.com/rakyll/hey@latest
+hey -z 30s -c 10 "http://localhost:8888/api/fact/complex?complexity=5"
+
+Watch HPA: kubectl get hpa factapi-hpa -n greeting-app -w
+
+GreetingComposerService:
+
+Generate load on http://<EXTERNAL-IP>/api/greeting/SomeName
+
+EXTERNAL_IP=$(kubectl get svc greetingcomposer-service -n greeting-app -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+hey -z 1m -c 20 "http://$EXTERNAL_IP/api/greeting/LoadTestUser"
+
+Watch HPA: kubectl get hpa greetingcomposer-hpa -n greeting-app -w
+
+Test Configuring Garbage Collection & Tuning Memory Parameters:
+
+Observe Baseline: Check kubectl top pods -n greeting-app and pod logs.
+
+Modify Deployment:
+
+Edit 01-factapi-deployment.yaml or 03-greetingcomposer-deployment.yaml.
+
+Add/uncomment env variables for DOTNET_gcServer, DOTNET_GCHeapHardLimitPercent, etc.
+
+Adjust resources.requests.memory and resources.limits.memory.
+
+Apply Changes: kubectl apply -f <filename>.yaml
+
+Generate Load: Use the complex fact endpoint for FactApiService or high traffic for GreetingComposerService.
+
+Observe: Check kubectl top pods, logs, and kubectl describe pod <pod-name> -n greeting-app for OOMKilled events if limits are too low. Use dotnet-counters inside the pod for detailed GC stats.
+
+Phase 4: Cleanup (Important for Cost Saving)
+
+Delete Resources:
+
+Delete individual deployments/services/HPAs:
+
+kubectl delete -f . -n greeting-app # If in the k8s directory
+kubectl delete ns greeting-app
+
+Stop or Delete AKS Cluster:
+
+az aks stop --name $AKS_CLUSTER_NAME --resource-group GreetingAppRG
+# OR to delete completely:
+# az aks delete --name $AKS_CLUSTER_NAME --resource-group GreetingAppRG --yes --no-wait
+
+Delete ACR and Resource Group (if completely done):
+
+# az acr delete --name $ACR_NAME --resource-group GreetingAppRG --yes
+# az group delete --name GreetingAppRG --yes --no-wait
+
+
+
+
+
+
+1. Stop the AKS Cluster (Deallocates Worker Nodes)
+When you stop an AKS cluster, the following happens:
+The Kubernetes control plane remains running (the management of AKS itself is free).
+All your worker nodes (Virtual Machines) are deallocated. This means you stop paying for the compute hours for these VMs.
+The state of your cluster, including your deployed applications and configurations, is preserved.
+Persistent Volumes (like Azure Disks attached to your pods via PVCs) will still exist and incur storage costs.
+Public IP addresses associated with LoadBalancer services will typically remain allocated and might incur a small cost.
+Command to Stop:
+# Ensure your variables are set or replace them directly
+# RG_NAME="GreetingAppRG"
+# AKS_CLUSTER_NAME="greetingappaks"
+
+az aks stop --name $AKS_CLUSTER_NAME --resource-group $RG_NAME
+This command can take a few minutes to complete as it shuts down and deallocates all the nodes in your node pools.
+You can check the status in the Azure portal or by running az aks show --name $AKS_CLUSTER_NAME --resource-group $RG_NAME --query "powerState.code" (it should eventually show Deallocated for nodes or Stopped for the cluster).
+While the cluster is stopped:
+You cannot deploy new applications or manage workloads using kubectl.
+Your applications will be unavailable as the pods are not running.
+The EXTERNAL-IP for your LoadBalancer services will still be reserved but won't route traffic to any running application.
+2. Start the AKS Cluster (Reallocates and Starts Worker Nodes)
+When you're ready to use the cluster again, you can start it. This will:
+Provision and start new worker nodes (or re-start the previously deallocated ones).
+Restore your Kubernetes control plane and workloads.
+Your deployed applications will start up according to their deployment specifications.
+Command to Start:
+# Ensure your variables are set or replace them directly
+# RG_NAME="GreetingAppRG"
+# AKS_CLUSTER_NAME="greetingappaks"
+
+az aks start --name $AKS_CLUSTER_NAME --resource-group $RG_NAME
+This command will also take several minutes to complete as it provisions and starts the nodes and re-establishes the Kubernetes cluster components.
+Once started, your applications should become available again. You might need to wait for pods to initialize and Load Balancers to re-establish their health checks.
+
+
+To check the status
+ kubectl get pods -n greeting-app -l app=greetingcomposer -w

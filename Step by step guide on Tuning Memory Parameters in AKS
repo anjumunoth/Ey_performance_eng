@@ -1,0 +1,223 @@
+
+**Step-by-Step Guide to Tuning Memory Parameters in AKS:**
+
+**Goal:** Set appropriate memory requests and limits for your applications to achieve stability, performance, and cost-efficiency.
+
+**Image Placeholder Idea:** A conceptual diagram showing a Node with "Total Memory," then sections for "OS/Kubelet Reserved," "Allocatable Memory," and within allocatable, Pods with their requests and limits.
+
+---
+
+**Step 1: Understand Your Application's Memory Needs**
+
+This is the most crucial and often iterative step.
+
+1.  **Baseline Measurement (If App is Already Running):**
+    *   **`kubectl top pod <pod-name> -n <namespace> --containers`:**
+        Shows current memory usage (Working Set) of containers in a Pod. This is a point-in-time snapshot.
+        ```
+        # Image: kubectl_top_pod_memory.png
+        # Description: Screenshot of `kubectl top pod` output showing MEMORY(bytes) column for containers.
+        ```
+    *   **Azure Monitor for Containers:**
+        *   Navigate to your AKS cluster in Azure portal -> Monitoring -> Insights.
+        *   Go to the "Containers" tab.
+        *   Select a Pod and look at the "Memory RSS" and "Memory Working Set" metrics over time.
+        *   Compare "Memory Usage (Working set)" against any existing requests/limits.
+        ```
+        # Image: azure_monitor_pod_memory_usage.png
+        # Description: Screenshot from Azure Monitor showing a graph of a container's memory working set over time, potentially with lines for request and limit.
+        ```
+    *   **Prometheus/Grafana (If set up):** Use queries like `container_memory_working_set_bytes{pod="<pod-name>"}`.
+
+2.  **Application-Specific Profiling:**
+    *   For JVM-based apps (Java, Scala, Kotlin): Analyze heap usage, garbage collection logs. `-Xmx` (max heap size) is a key setting.
+    *   For Python/Node.js/Go: Use language-specific profiling tools to understand memory allocation patterns.
+    *   For databases: Check their internal memory configuration and monitoring tools.
+
+3.  **Load Testing:**
+    *   Observe memory usage under various load conditions (peak load, average load) to understand how it scales.
+
+4.  **Initial Estimation (If New App):**
+    *   Start with a reasonable guess based on developer estimates, similar applications, or local testing.
+    *   It's often better to start slightly higher and then tune down.
+
+---
+
+**Step 2: Set Memory Requests and Limits in Pod/Deployment Manifests**
+
+1.  **Define `resources` for each container:**
+    ```yaml
+    # my-app-deployment.yaml
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: my-app
+    spec:
+      replicas: 3
+      selector:
+        matchLabels:
+          app: my-app
+      template:
+        metadata:
+          labels:
+            app: my-app
+        spec:
+          containers:
+          - name: my-app-container
+            image: my-app-image:latest
+            resources:
+              requests:
+                memory: "256Mi" # Request 256 Mebibytes
+              limits:
+                memory: "512Mi" # Limit to 512 Mebibytes
+            ports:
+            - containerPort: 8080
+          # - name: my-sidecar-container
+          #   image: my-sidecar-image:latest
+          #   resources:
+          #     requests:
+          #       memory: "128Mi"
+          #     limits:
+          #       memory: "256Mi"
+    ```
+    *   Units: `Mi` (Mebibytes), `Gi` (Gibibytes), `Ki` (Kibibytes). Also `M`, `G`, `K` (Megabytes, Gigabytes, Kilobytes) are possible but binary prefixes (Mi, Gi) are generally preferred for memory.
+
+    ```
+    # Image: pod_spec_memory_requests_limits.png
+    # Description: A snippet of YAML highlighting the `resources.requests.memory` and `resources.limits.memory` sections.
+    ```
+
+2.  **Strategy for Setting Values:**
+    *   **Critical Applications (e.g., databases, core APIs):**
+        *   Often set `requests.memory` equal to `limits.memory` (Guaranteed QoS).
+        *   Set this value to slightly above the observed peak memory usage under load to provide a buffer.
+    *   **General Applications (e.g., web frontends, less critical services):**
+        *   `requests.memory`: Set to the typical average memory usage. This ensures it gets scheduled correctly.
+        *   `limits.memory`: Set higher than requests, allowing it to burst during peak loads, but low enough to prevent it from hogging all node memory. A common starting point is 2x the request, but this needs tuning.
+    *   **Batch Jobs / Non-critical tasks:** Can be more aggressive with lower requests or even BestEffort (no requests/limits), but understand they are first to be OOMKilled.
+
+3.  **Apply the Changes:**
+    `kubectl apply -f my-app-deployment.yaml`
+
+---
+
+**Step 3: Monitor and Iterate**
+
+Tuning is not a one-time task.
+
+1.  **Observe Pod Behavior:**
+    *   Are Pods getting OOMKilled? `kubectl get pods -n <namespace>` (look for `OOMKilled` status or high restart counts).
+    *   `kubectl describe pod <pod-name> -n <namespace>` (look at `Events` for OOMKilled messages and `Last State` for reason of termination).
+        ```
+        # Image: kubectl_describe_pod_oomkilled.png
+        # Description: Screenshot of `kubectl describe pod` output showing an OOMKilled event or Last State.
+        ```
+    *   If OOMKilled: The memory *limit* is too low. Increase it.
+
+2.  **Analyze Usage vs. Requests/Limits (Azure Monitor / Prometheus):**
+    *   Are requests too high? (Consistent low usage compared to request means wasted reserved memory, hindering scheduling of other pods). Consider lowering requests.
+    *   Are requests too low? (Consistent high usage far above request, nearing limit, means it might be starved if other Pods also burst). Consider raising requests.
+    *   Are limits appropriate? (Is usage frequently hitting the limit, causing OOMKills? Or is the limit excessively high, risking node instability if many pods burst simultaneously?)
+
+3.  **Check Node Health:**
+    *   `kubectl describe node <node-name>`: Look for `Conditions`, especially `MemoryPressure`. If `True`, nodes are struggling.
+        ```
+        # Image: kubectl_describe_node_memorypressure.png
+        # Description: Screenshot of `kubectl describe node` output showing the MemoryPressure condition as True.
+        ```
+    *   Check `Allocatable` memory on nodes and compare it with the sum of requests of Pods scheduled on it.
+
+4.  **Adjust and Re-deploy:**
+    *   Modify your YAML manifests with new request/limit values.
+    *   `kubectl apply -f ...`
+    *   Repeat the monitoring cycle.
+
+---
+
+**Step 4: Consider Node-Level Configurations (Kubelet)**
+
+If you consistently see node memory pressure despite well-configured Pods, or want finer control:
+
+1.  **Understand Node Allocatable Memory:**
+    *   `kubectl get node <node-name> -o yaml` (look at `status.capacity.memory` and `status.allocatable.memory`).
+    *   The difference is due to `kube-reserved`, `system-reserved`, and eviction thresholds.
+
+2.  **Customize Kubelet Eviction Thresholds (if needed):**
+    *   The default `evictionHard.memory.available` is often `100Mi`.
+    *   If your nodes have very large memory, you might want a larger absolute value or a percentage.
+    *   This is done via KubeletConfiguration in AKS (see previous Garbage Collection guide for how to apply KubeletConfiguration).
+    *   **Example `kubeletconfig.json` fragment:**
+        ```json
+        {
+          "evictionHard": {
+            "memory.available": "250Mi", // Evict if less than 250Mi available
+            "nodefs.available": "5%",
+            "imagefs.available": "10%"
+          }
+          // ... other Kubelet settings
+        }
+        ```
+    *   **Caution:** Modifying KubeletConfiguration requires node pool updates (node re-imaging), which can be disruptive.
+
+3.  **Customize `kube-reserved` and `system-reserved` (Advanced):**
+    *   `kube-reserved`: Memory reserved for Kubernetes daemons (Kubelet, container runtime).
+    *   `system-reserved`: Memory reserved for OS system daemons (e.g., sshd, journald).
+    *   AKS has defaults. If your monitoring shows Kubelet or system processes consuming more than defaults and impacting Pods, you *can* adjust these via KubeletConfiguration. This is less common for memory tuning than for CPU.
+    *   **Example `kubeletconfig.json` fragment:**
+        ```json
+        {
+          "kubeReserved": {
+            "memory": "500Mi"
+          },
+          "systemReserved": {
+            "memory": "500Mi"
+          }
+          // ... other Kubelet settings
+        }
+        ```
+
+---
+
+**Step 5: Implement Namespace ResourceQuotas and LimitRanges (Optional but Recommended for Multi-Tenancy/Shared Clusters)**
+
+1.  **ResourceQuota:** To cap total memory requests/limits per namespace.
+    ```yaml
+    # my-namespace-quota.yaml
+    apiVersion: v1
+    kind: ResourceQuota
+    metadata:
+      name: mem-cpu-quota
+      namespace: my-team-namespace
+    spec:
+      hard:
+        requests.memory: "10Gi" # Total memory requests in this namespace cannot exceed 10Gi
+        limits.memory: "20Gi"   # Total memory limits in this namespace cannot exceed 20Gi
+        # requests.cpu: "4"
+        # limits.cpu: "8"
+    ```
+    `kubectl apply -f my-namespace-quota.yaml`
+
+2.  **LimitRange:** To set default requests/limits if not specified by Pods, or enforce min/max.
+    ```yaml
+    # my-namespace-limitrange.yaml
+    apiVersion: v1
+    kind: LimitRange
+    metadata:
+      name: mem-limit-range
+      namespace: my-team-namespace
+    spec:
+      limits:
+      - type: Container
+        default: # Default limit if not specified
+          memory: "512Mi"
+        defaultRequest: # Default request if not specified
+          memory: "256Mi"
+        max: # Max limit a container can ask for
+          memory: "2Gi"
+        min: # Min request a container must have
+          memory: "64Mi"
+    ```
+    `kubectl apply -f my-namespace-limitrange.yaml`
+
+---
+

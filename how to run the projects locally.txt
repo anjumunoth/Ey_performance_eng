@@ -1,0 +1,15 @@
+Local Testing Notes
+Run FactApiService:
+Navigate to FactApiService directory.
+dotnet run
+It will likely run on http://localhost:5xx1 and https://localhost:7xx1. Note the HTTP port (e.g., 5001).
+Test in browser: http://localhost:5001/api/fact and http://localhost:5001/health
+
+
+
+Run GreetingComposerService:(let FactApiService be running as well)
+Update GreetingComposerService/appsettings.json -> FactService:BaseUrl to point to the correct HTTP URL of your running FactApiService (e.g., "http://localhost:5001").
+Navigate to GreetingComposerService directory.
+dotnet run
+It will likely run on http://localhost:5xx2 and https://localhost:7xx2.
+Test in browser: http://localhost:5xx2/api/greeting/Alice and http://localhost:5xx2/health
