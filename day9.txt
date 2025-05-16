@@ -1,0 +1,82 @@
+Container
+	-- will have many pods
+	-- each pod perform some work
+	-- user tasks and system tasks
+
+diagscenarios -- published app services -- insights monitor the app
+	-- monolithic application -- single service
+
+microservices :
+	-- modularity
+	-- multiple services
+	-- services -- expose endpoints
+	-- services may interact with each other
+
+amazon
+	-- products -- browse, adding to cart, buying
+	-- amazon pay -- add money, buy
+	-- fresh -- buy groceries
+	-- prime -- watch movies
+	-- microservice 
+		-- modularity 
+			-- separate teams can develop 4 products
+		-- testing,manage, update -- work only with module
+		-- interactions 
+		-- scaling 
+
+Prime day sale 
+	-- specific timeperiods
+	-- huge discounts on products alone
+	-- normal day -- user traffic -- 1 million users
+	-- prime day sale -- user traffic -- 10 million users
+	-- after prime day -- user traffic -- 1 million users
+	-- during prime day sale -- no app crash
+		-- scale up the app
+			-- increase the infrastructure (cpu, memory) -- vertical scaling
+			-- increase the number of app servers -- horizontal scaling
+			-- horizontal scaling
+	-- after prime day sale -- optimising resources/cost
+		-- scale down
+			-- decrease the number of app servers
+	-- auto scaling 
+		-- based on traffic/metric -- scale up and scale down automatically
+		-- cannot always predict the change in metric 
+
+App 
+	-- how important is scalability ?
+		-- availability
+		-- performance of app
+		-- cost optimised
+		-- good user experience
+		
+Scalability
+	-- horizontal scaling
+		-- increase/decrease the number of nodes which are running the servers
+microservices
+		-- multiple services
+			-- can run in diff languages/ environments/ versions of framework
+			-- interaction between these services
+		-- scalability
+docker and k8
+	-- docker 
+		-- image
+			-- code, requirements(configuration, runtime environment, dependencies) -- pack it into an image
+			-- give this image -- run this service
+			-- run this image -- runtime environmemt; dependencies setup -- run ur service
+			
+	-- k8
+		-- deployment, scaling, monitoring -- orchestrator
+		-- put all of it in containers
+suitcase -- Kubernetes container
+pouches -- docker images 
+
+aks 
+	-- Kubernetes on azure
+
+	
+
+
+			
+	
+
+

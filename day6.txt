@@ -1,0 +1,35 @@
+CPU intensive app or memory intensive app
+
+Scenario 1: 1 lakh line and 10 workers
+	Optimised option; cpu -- less ; memory each thread 10000lines
+Scenario 2: 1 lakh line and 10000 workers
+cpu -- more ; memory each thread 10lines
+
+Scenario 3: 10000 line and 1 workers
+cpu -- less ; memory each thread 10000lines
+
+Scenario 4: 10000 line and 100 workers
+cpu -- little more ; memory each thread 100 lines
+
+
+Optimisation : Number of threads -- number of lines 
+Larger the file -- lesser the number of threads
+Smaller the file -- lesser the number of threads
+
+
+Number of threads -- More threads -- more memory 
+More number of line -- more memory
+More threads -- memory (reclaim can happen, lesser number of lines to be processed) may be properly utilised
+Lesser threads -- lesser process memory
+
+Balance between the number of threads and number of lines each thread will process()
+12 lakh lines; 3 worker threads
+12 lakh lines; 6 worker threads -- best
+1200 lakh lines; 20 worker threads
+1200 lakh lines; 200 worker threads -- best
+
+
+Each thread 
+
+
+

@@ -1,0 +1,31 @@
+Obj1 -- override finalizer() 
+Obj2 -- not override finalizer()
+
+
+Object 
+	-- lifecycle 
+		-- constructor -- initialisations,subscribe to 3rd party events, start a timer 
+		-- user defined methods
+		-- destructor() -- cleaning up process -- stop the timers, unsubscriptions, database -- disconnect, file handlers -- close
+		-- finalize () -- similar to destructor -- before goes out of scope -- cleaning up process; stop the timers, unsubscriptions, database -- disconnect, file handlers -- close 
+		-- overridden 
+		
+Once an object goes out of scope -- dead object; during gc collect -- reclaim memory from dead objects; dead object are grouped into 2 groups; group --have finalizer method; without finalizer group; 
+	-- no finalizer method overridden methods -- memory will be reclaimed
+	-- finalizer method overridden methods -- execute the finalizer -- added to F queue
+	-- at regular intervals , finalizer thread will be started -- execute the finalizer methods and after completion , give the memory for reclaiming
+
+why finalisation ? 
+	-- clean up
+		-- unsubscription
+		-- stop the timers
+		-- close the db connections
+		-- close the open file handlers
+		-- avoid memory leaks
+
+
+
+int[] arr=new int[10];
+arr[0]=100;
+
+

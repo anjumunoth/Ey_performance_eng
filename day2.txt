@@ -1,0 +1,202 @@
+notelgnis sv citatS
+dohtem ,dleif -- citats
+ssalc -- notelgnis
+detaerc eb nac ssalc eht fo tcejbo eht fo eno ylnO --	
+ecnatsni na etaerc -- tnuof fer on -- jbo na etaerc i emit tsriF --	
+ecnatsni detaerc ydaerla eht nruter -- ssalc notelgnis fo jbo na etaerc ot yrt i emit txeN --	
+
+eeyolpmE ssalc
+{
+;yralas,dIpme tni cilbup	
+;rtc tni citats cilbup	
+}
+
+)(niam diov citats
+{
+elbairav citats eht fo ecnerefer elgnis eht erahs lliw stcejbo n eht llA ; rav citats eht ssecca //	
+;001=rtc.eeyolpmE	
+
+}
+
+
+esnopser eht nruter ;tseuqer fo ssecorp ;tneilc eht morf tseuqer eht eldnaH -- revreS
+stniopdne -- revreS
+revres eht morf esnopser -- )lru(tniopdne ralucitrap a tih tneilc
+ TSER
+tseuqer teg --	
+tceles ;ofni emos rof ksa --		
+ tsop --	
+tresni ; atad emos dda --		
+ tup --	
+atad gnitsixe emos etadpu --		
+eteled --	
+atad emos fo eteled --		
+
+ ;)redaeh ,)atad(daolyap ,tseuqer fo dohtem ,lru( tseuqer evig lliw -- tneilc
+ ; )eruliaf ro sseccus( etelpmoc ecno ; tseuqer fo ssecorp ; tseuqer eht teg lliw revres
+ 102 ,002 lufsseccus -- edoc sutats pu tes
+005 ,404 -- eruliaf --    	
+) )nosj,lmx(atad ,redaeh( esnopser eht nruter
+
+
+ erutcetihcra CVM
+ppa eht htiw detaicossa atad -- ledoM
+noitacilppa eht fo IU -- weiV
+detadpu eb dluohs weiv eht segnahc ledom eht fI ;detadpu eb dluohs ledom eht ,segnahc weiv fI ;M dna V eht neewteb egdirb -- rellortnoC
+
+)(1cnuf diov
+{
+;)(2cnuf	
+}
+)(2cnuf diov
+}{
+)(niam diov
+{
+;)(1cnuf	
+}
+
+ upc emos ekat osla lliw 1cnuf -- detucexe teg lliw 1cnuf ;upc emos pu ekat ;sey -- )( gninnur niam >--)(1cnuf llac >--detucexe eb lliw )(niam
+
+
+>puorGytreporP<
+>noitcelloCegabraGrevreS/<eslaf>noitcelloCegabraGrevreS<  
+  
+>puorGytreporP/<
+
+
+:sneppah siht yhw s’ereH
+.ehcac eht morf devomer ylticilpxe era yeht litnu meht eerf **tonnac** rotcelloc egabrag eht ,yranoitcid ro ehcac a edisni stcejbo `remotsuc` gnirots si `)remotsuc(noitcasnarTssecorP.p` fI – **ehcaC ni secnerefeR tnetsisreP** .1
+.ti raelc yllaunam tsum uoY .)ehcac a ekil( egarots lanretxe yna morf ti evomer yllacitamotua **ton seod** tcejbo eht fo gnisopsid ,tnemetats `gnisu` eht gnisu er'uoy hguoht nevE – **lasopsiD citamotuA oN** .2
+.epocs noitcnuf eht dnoyeb tsisrep yam stcejbo ,msinahcem egarots citats rehtona ro ,`yranoitciD` ,`ehcaCyromeM` gnisu si noitacilppa ruoy fI – **ehcaC ediW-noitacilppA** .3
+
+:tI xiF ot woH ###
+:enod si gnissecorp ecno meht evomer ,secnatsni `remotsuC` speek ehcac eht fI – **ehcaC morf evomeR ylticilpxE** -
+prahsc```  
+;)dI.remotsuc(evomeR.ehcac  
+```  
+.dedeen nehw noitcelloc egabrag wolla ot `>remotsuC<ecnerefeRkaeW` gnisu redisnoc ,gniregnil stcejbo tnaw t’nod tub gnihcac yraropmet deen uoy fI – **secnerefeR kaeW esU** -
+.ylreporp eripxe stcejbo taht erusne ,`ehcaCyromeM` gnisu er’uoy fI – **yciloP noitneteR ehcaC kcehC** -
+
+.noitpmusnoc evissecxe ro skael ekil seussi yromem laitnetop esongaid dna sdnert egasu yromem ezilausiv uoy spleh tI .metsys gnitarepo eht yb ssecorp s’noitacilppa ruoy ot detacolla yromem fo tnuoma eht stneserper hparg **yromeM ssecorP** eht ,reliforp yromem s’oidutS lausiV nI
+
+**:swohS tI tahW** ###
+.yromem deganamnu dna deganam gnidulcni ,detacolla sah ssecorp eht taht yromem fo tnuoma latot ehT **:setyB etavirP** -
+.ssecorp eht rof MAR lacisyhp otni dedaol yltnerruc yromem fo noitrop ehT **:teS gnikroW** -
+.paeh deganam TEN. eht morf snoitacolla yromeM **:snoitacollA paeH** -
+.snoitarepo punaelc yromem gnitacidni ,snur rotcelloc egabrag eht nehw sekipS **:ytivitcA CG** -
+
+**:srettaM tI yhW** ###
+.**kael yromem** a etacidni thgim ti ,**sesaercni ylsuounitnoc** egasu yromem fI -
+.ylevitceffe gnikrow si noitcelloc egabrag taht stseggus ti ,yllacidoirep **spord** egasu yromem fI -
+.stcejbo dennip ro ,secnerefer citats ,sehcac ot eud ylbissop ,detcepxe naht regnol deniater era stcejbo naem dluoc **level yromem hgih talf** A -
+
+:seigetarts evitceffe emos era ereH .noitcelloc egabrag tneiciffe gnirusne dna ,skael gnitneverp ,snoitacolla yromem gnizimitpo seriuqer noitacilppa TEN. a ni **egasu yromem ssecorp** gnicudeR
+
+**snoitacollA tcejbO yrassecennU ecudeR .1** ###
+.spool edisni snoitacolla eziminiM -
+.snoitacolla paeh diova ot stcejbo llams rof **sessalc** fo daetsni **stcurts** esU -
+.daetsni `redliuBgnirtS` esu—snoitanetacnoc gnirts yrassecennu diovA -
+
+**ylreporP stcejbO esopsiD .2** ###
+.enod nehw `)(esopsiD.` llac dna `elbasopsiDI` tnemelpmi stcejbo erusnE -
+:stcejbo esopsid **yllacitamotua** ot tnemetats `gnisu` eht esU -
+prahsc```  
+))(ssalCelbasopsiDemoS wen = ecruoser rav( gnisu  
+{  
+ecruoser htiw kroW //      
+}  
+```  
+
+**)HOL( paeH tcejbO egraL ezimitpO .3** ###
+.noitcelloc egabrag yb detcapmoc ton si hcihw ,HOL otni og **BK 58 naht regral** stcejbO -
+.**stcejbo egral gniloop** yb snoitacolla yromem egral ecudeR -
+
+**snoitcelloC & ehcaC yromeM timiL .4** ###
+.htworg yromem evissecxe tneverp ot seiranoitcid ro `ehcaCyromeM` morf seirtne elats evomeR -
+.noitneter gnol deen t’nod taht stcejbo rof **ecnerefeRkaeW** esU -
+
+**)CG( noitcelloC egabraG eganaM & rotinoM .5** ###
+.noitcudorp ni ton—gniggubed rof ylno **)(tcelloC.CG** esU -
+:ecnamrofrep ezimitpo ot `nosj.sgnittesppa` ni **sgnittes CG** teS -
+nosj```  
+{  
+yrassecennu fi CG revres selbasiD //  eslaf :"revreS.CG.metsyS"      
+}  
+```  
+.**reliforP yromeM oidutS lausiV** gnisu roivaheb noitcelloc egabrag eliforP -
+
+**egasU gnidaerhT-itluM ezimitpO .6** ###
+.noitacolla yromem evissecxe tneverp ot noitnetnoc daerht ecudeR -
+.sdaerht dekcolb eziminim ot yltneiciffe **tiawa/cnysa** esU -
+
+**slooT gniliforP htiw yromeM kcarT .7** ###
+.skael yromem ezylana ot **reliforP oidutS lausiV** ro ,**weiVfreP** ,**yromeMtod** esU -
+.punaelc CG tneverp taht **stcejbO denniP** kcehC -
+
+:noitacilppa TEN. ruoy ni secnerefer citats evomer ylefas nac uoy woh s’ereH .skael yromem ot dael nac hcihw ,yletinifedni yromem ni gniregnil morf stcejbo gnitneverp rof laicurc si **secnerefer citats** gnivomeR
+
+**stcejbO gnidloH secnerefeR citatS yfitnedI .1** ###
+:sa hcus ,**sdleif citats** ni derots stcejbo rof kooL -
+prahsc```  
+;remotsuCdehcaC remotsuC citats cilbup  
+```  
+:noitcelloc egabrag reporp tneverp osla yam )sehcac ro ,seiranoitcid ,stsil ekil( **snoitcelloc citats** ni derots stcejbO -
+prahsc```  
+;)(>remotsuC ,gnirts<yranoitciD wen = ehcaCremotsuC >remotsuC ,gnirts<yranoitciD citats cilbup  
+```  
+
+**secnerefeR citatS raelC ylticilpxE .2** ###
+:dedeen regnol on s'ti nehw `llun` ot ecnerefer citats eht teS -
+prahsc```  
+;llun = remotsuCdehcaC  
+```  
+:noitcelloc citats a morf seirtne cificeps evomeR -
+prahsc```  
+;)"dIremotsuc"(evomeR.ehcaCremotsuC  
+```  
+:**noitcelloc eritne eht raelc** ,elbissop fI -
+prahsc```  
+;)(raelC.ehcaCremotsuC  
+```  
+
+**stcejbO laitnessE-noN rof secnerefeR kaeW esU .3** ###
+:dedeen nehw noitcelloc egabrag wolla ot **ecnerefeRkaeW** esu ,sdleif citats ni secnerefer gnorts gnidloh fo daetsnI
+prahsc```
+;))"321"(remotsuC wen(>remotsuC<ecnerefeRkaeW wen = remotsuCdehcaC >remotsuC<ecnerefeRkaeW citats cilbup
+
+))remotsuc remotsuC tuo(tegraTteGyrT.remotsuCdehcaC( fi
+{
+ylefas tcejbo remotsuc eht esU //    
+}
+esle
+{
+detcelloc egabrag neeb sah remotsuC //    
+}
+```
+
+**stcejbO citatS deviL-gnoL gnipeeK diovA .4** ###
+:rof desu eb ylno dluohs stcejbo citatS .stcejbo depocs ro **noitcejni ycnedneped** referp ,secnerefer citats fo daetsnI
+)sgnittes noitarugifnoc ,.g.e( **stcejbo elbatummI** -
+**seicilop noitaripxe htiw smsinahcem ehcac thgiewthgiL** -
+
+**secnerefeR citatS dniF ot slooT gniliforP esU .5** ###
+.snoitcelloc egabrag ssorca tsisrep taht stcejbo citats dnif ot **reliforP yromeM oidutS lausiV** nuR -
+.stcejbo deniater tcepsni ot **weiVfreP** ro **yromeMtod** esU -
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

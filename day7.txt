@@ -1,0 +1,40 @@
+Managed Memory Analyzer :
+	-- perfview
+	-- Count of gc's , metadata about each gc
+	-- when each gc happened, why it happened, timeleine when it happened, how much pause it caused on other threads
+	-- size before and size after of each gc
+	-- majority reason -- gc's triggered -- allocsmall -- lot of allocations --problem in hand -- code which is a lot of allocations. Solution -- optimise soh
+	-- 
+
+why gen1 count gen 0's count
+
+who decides which gc(gen gc) has to happen
+	--  gc decides when the collection should happen, size of each heap(dynamic), which gc gen it has to collect
+	-- majority reason that the gc triggered -- soh
+	-- gen 1 happening more
+		-- when will gen 1 triggered -- low memory in gen 1; threshold, allocations(promotions from gen 0)
+		-- objects are living more than short lived objects
+		-- many objects which are surviving gen 0 collection
+	-- 
+
+gen 1 gc is a problematic gc:
+	-- maximum count (number of times)
+	-- objects are surviving for a medium time 
+		-- solution -- weak references; 
+
+epheremal (gen 0 and gen 1) -- foreground
+
+gen 1
+1n 
+1f
+
+Explicit gc collection : 
+GC.collect();//Full collection
+GC.collect(0);// collect only for gen 0
+GC.collect(1);// collect for gen 0 and gen 1
+
+Implicit gc collection:
+Full
+partial (only one specific gc )
+
+

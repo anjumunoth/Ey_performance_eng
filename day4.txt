@@ -1,0 +1,7 @@
+Gen 0 is too big
+	-- Solution 
+		-- reuse the already created objects
+		-- use Weak References wherever possible
+		-- pooled objects wherever possible
+		-- use the using keyword -- limit the scope of the variable to a particular block of code instead of the entire function 
+		

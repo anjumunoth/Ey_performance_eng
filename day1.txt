@@ -1,0 +1,196 @@
+krowemarf ten.
+ppa na dliub --
+ ecalp eno ni sloot eht lla --  RLC ,)s(relipmoc ,snoitcennoc , )segakcap(snigulp , )++c ,BV ,#C(edoc --	
+erutcetihcra --	
+ yromem --	
+paeh,kcats --		
+ ppa ten. fo noitucexe --	
+)segaugnal suoirav(ppa na poleved --		
+noitalipmoc --		
+ edoc LI ,srorre xatnys --			
+setyb 4 seipucco tni ++C ;setyb 2 seipucco tni C --			
+ sedoc elipmoc gnidnopserroc -- sedoc 2 elipmoc --			
+STC noitacificeps epyT nommoC -- RLC --			
+)yromem tnatsnoc( epyt tni STC a otni tni siht trevnoc --				
+	SLC --			
+) gninnur ro noitucexe( edoc enihcam otni edoc LI trevnoc --			
+yromem eht pu naelc ,yromem fo noitacolla -- CG --			
+
+ofni redaeh -- atadatem --			
+			
+euv ,tcaer ,ralugna ,ten. ,sjedon , avaj
+
+)1s tni(2cnuFym tni
+{
+1// ;1s*1s nruter	
+}
+
+)2p tni ,1p tni(1cnuFym tni
+{
+2//;)1p(2cnuFym=1p	
+3//;)2p(2cnuFym=2p	
+4//;2p+1p nruter	
+}
+
+)(niam diov
+{
+5//;)02,01(1cnuFym=tluser tni	
+6//;)tluser,"d%"(ftnirp	
+}
+
+ ,selbairav depyt eulav : kcatS
+selbairav depyt ecnerefer, stcejbo : paeh
+
+ tuO tsriF nI tsal OFIL : kcatS
+
+: noitisop kcatS
+)(dellac niam	--
+tats tsrif eht htiw trats --
+kcats eht ni txen detucexe eb ot tats eht fo sserdda eht hsup ro dda ; llac noitcnuf --
+detucexe eb ot tats eht fo sserdda -- noitarepo pop -- etelpmoc noitucexe noitcnuf eht retfa --
+
+: nur yrD
+ytpme -- kcatS
+detucexe eb lliw niam
+5 -- kcatS ; llac noitcnuf ;detucexe eb lliw 5
+)detucexe gnitteg si 1(gnitucexe trats lliw 1cnuFym
+2,5 kcatS ; llac noitcnuf ;detucexe eb lliw 2
+; deppop eb lliw 2 tats ; noitarepo pop ;001 nruter ;detucexe eb lliw 2cnuFym
+5 : kcatS ;001 -- 1p ;eunitnoc lliw 2 tats
+3,5 kcatS ; llac noitcnuf ;detucexe eb lliw 3
+; deppop eb lliw 3 tats ; noitarepo pop ;004 nruter ;detucexe eb lliw 2cnuFym
+5 : kcatS ;004 -- 2p ;eunitnoc lliw 3 tats
+;deppop eb lliw 5 tats : noitarepo poP ;005 nruter lliw 1cnuFym
+;005= tluser ;demuser eb lliw 5 tats
+detucexe eb lliw 6
+
+ kcatS
+ylticilpmi detaerc si --	
+ylticilpmi neppah osla pop dna hsup --	
+)revo si noitucexe niam nehw(ylticilpmi osla deitpme si --	
+ON -- deriuqer -- ecnaraelc egabrag si --	
+selbairav epyt eulav --	
+
+ paeH
+
+ ecnerefer sv epyt eulaV
+
+ epyt eulaV
+naelooB ,rav ciremun --	
+ kcats eht ni derots --	
+ epyt ecnerefeR
+ gnirts ,drowyek wen , tcejbo ,sretniop --	
+paeh --	
+
+CG
+tnemeganam yromem --	
+yromem etacolla --	
+deralced era selbairav --		
+dereggirt --	
+yromem wol --		
+eulav dlohserht dehcaer --		
+ snoitcapmoc launam --		
+
+yromem pu eerf --	
+dehcaer si dlohserht niatrec --		
+	epocs fo tuo seog rav --		
+yromem lautriv ro lacisyhp -- yromem --	
+MV --		
+detacolla si MV -- nur ot ppa --		
+ MV --		
+skcats daerht dna )s(kcats --			
+paeh --			
+atadatem --			
+ edoc --			
+ noitcapmoc --	
+cg yb enod spets tnatropmi eht fo eno --		
+MV eht no enod --		
+)esuap ot daerht ppa eht eriuqer( sey -- ssecorp yltsoc --		
+ ssecorp yrotadnam ;elbissop sa ssel sa -- ycneuqerf --		
+noitatnemgarfed --		
+ neppah dluohs noitcapmoc dluohs nehw ecnalab -- CG --		
+dereggirt ro neppah noitcapmoc si nehw --		
+yromem wol --			
+eulav dlohserht dehcaer --			
+ snoitcapmoc launam --			
+
+ 
+			
+ snoitareneG --	
+2 neg dna 1 neg ,0 neg		
+ dezis yllacimanyD --		
+ON -- ylticilpxe snoitareneg fo ezis eht erugifnoC --		
+stcejbo wen -- 0 neg		
+ stcejbo devil gnol -- 2 neg		
+snoitomorp		
+noitareneg txen eht ot detomorp -- noitcelloc taht sevivrus tcejbo ; noitcelloc --		
+)setyb 00058> ezis tcejbo(paeh tcejbo egral ,)setyb 00058< ezis tcejbo(paeh tcejbO llamS -- HOL ,HOS --		
+tsehgih si 2 neg ni gnieb ti fo ytilibissop -- tcejbo fo efil eht regnol --		
+ tcejbo fo ezis --		
+  2neg -- HOL --			
+yltneuqerf ssel -- riaffa yltsoc -- atad gnivom dna yromem desunu fo pu gnieerf -- noitcapmoc ;)segats 3( ssecorp noitcelloc CG --				
+2 neg od dluow ti neht ;1 neg -- ecaps hguone ton si ereht fi ;0 neg -- ssecorp noitcelloc --				
+ snoitcelloc tnerrucnoc ,laitrap ,lluF --			
+sneg 3 eht lla no demrofrep noitcelloC -- noitcelloc lluF --				
+neg ralucitrap a no demrofrep noitcelloC- noitcelloc laitraP --				
+0 neg eriuqer yam ti ;2 neg gniod elihW -- snoitcelloc tnerrucnoC --				
+
+ppa eht ni stcejbo 001 :ecnamrofreP
+:1 oiranecS
+ton ro evil era stcejbo 001 eht lla fi kcehC	
+)retteB( :2 oiranecS
+ton ro evil era 0 neg --)devil trohs(stcejbo eht fo emos fi kcehC	
+
+
+ devil gnol ro devil trohS
+e,d,c,b,a -- )stcejbo(raV
+selbairav eht lla esilaitinI
+0- neg fo trap sa yromem eht nevig eb lliW
+yromem wol .yromem ni detacolla eb ot sah hcihw )f(tcejbo llams wen -- oiranecS
+tcelloc mrofrep -- CG
+1 neg ot ti etomorp -- evila era stcejbo 5 -- evila era hcihw stcejbo eht rof kcehc --
+0- neg ot detacolla eb lliw f --
+epocs fo tuo og d dna b
+tcelloc mrofrep -- cG
+f : 0- neg
+e c a --1 neg
+
+
+gnitset ecnamrofreP
+deeps --	
+ emit noitucexe ; emit esnopser --		
+elbissop sa tsaf sa -- eulav laedi --		
+ytilibats --	
+hsarc on ;emit esnopser ; elbats --		
+ytilibalacs --	
+ sresu n ro resu eno --		
+gnitset daol --		
+noitasilitu ecruoser --	
+upc --		
+wol eb dluohs noitasilitu upc --			
+yromem --		
+wol si yromem --			
+dediova -- snoitpecxe wol yromem --			
+ksid --		
+ sthgisnI ppA --	
+noitasilitu ecruoser rof kcehc shparg / srotinom --		
+skcenelttob yfitnedI --		
+kcoldaed --			
+kael yromem --			
+secitcarp gnidoc dab --			
+yltneuqerf dellac si CG --			
+seireuq esabatad --			
+mrofni -- lortnoc ruo rednu ton -- )secivres/edoc lanretxe( s'IPA --			
+ --			
+			
+ snoituloseR --		
+ --			
+		
+ --	
+ tniopkaerb ts1
+bk535 paeh	
+	
+
+
+
+
